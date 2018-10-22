@@ -9,7 +9,7 @@ from helpers.maintenance.update_static_timestamp import js_stamp
 
 class PcMenu(BaseEngine):
     url_name='zhujiajiao'
-    brand='朱家角管理平台'
+    brand='朱家角网格'
     mini_brand='ZJJ'
     menu=[
         {'label':'监督员','url':page('inspector.inspector'),'icon':fa('fa-user-secret'),

@@ -155,6 +155,7 @@ MEDIA_ROOT= os.path.join( os.path.dirname(BASE_DIR),'media')
 MEDIA_URL = '/media/'
 
 
-STREET_CODE = 1803  # 重固 1809
+STREET_CODE = 1803  # 重固是 1809；
 XUNCHA_CODE = 6
 DEPTCODE = 20701
+MAP_CENTER = [121.05388,31.109867]
