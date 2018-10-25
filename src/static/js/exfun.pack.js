@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 103);
+/******/ 	return __webpack_require__(__webpack_require__.s = 106);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -476,6 +476,11 @@ var code = exports.code = {
     },
     eval: function _eval(js, scope) {
         return eval(js);
+    },
+    _count: 0,
+    get_uid: function get_uid() {
+        this._count++;
+        return this._count;
     }
     //hashCode: function (input){
     //    var I64BIT_TABLE =
@@ -788,6 +793,46 @@ var cookie = exports.cookie = {
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+var file_proc = exports.file_proc = {
+    qrcode: function qrcode(selector, kws) {
+        /*
+        *      $("#qrcodeCanvas").qrcode({
+         render : "canvas",    //设置渲染方式，有table和canvas，使用canvas方式渲染性能相对来说比较好
+         text : "这是修改了官文的js文件，此时生成的二维码支持中文和LOGO",    //扫描二维码后显示的内容,可以直接填一个网址，扫描二维码后自动跳向该链接
+         width : "200",               //二维码的宽度
+         height : "200",              //二维码的高度
+         background : "#ffffff",       //二维码的后景色
+         foreground : "#000000",        //二维码的前景色
+         src: '/static/images/logo.png'             //二维码中间的图片
+         });
+        * */
+        ex.load_js_list(['/static/lib/jquery.qrcode.js', '/static/lib/utf.js'], function () {
+            var def_cfg = {
+                render: "canvas", //设置渲染方式，有table和canvas，使用canvas方式渲染性能相对来说比较好
+                text: "", //扫描二维码后显示的内容,可以直接填一个网址，扫描二维码后自动跳向该链接
+                width: "200", //二维码的宽度
+                height: "200", //二维码的高度
+                background: "#ffffff", //二维码的后景色
+                foreground: "#000000", //二维码的前景色
+                src: '' //二维码中间的图片
+            };
+
+            ex.assign(def_cfg, kws);
+            $(selector).qrcode(def_cfg);
+        });
+    }
+};
+
+/***/ }),
+/* 12 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
 var layout = exports.layout = {
     stickup: function stickup(node) {
         var $cur = $(node); //方便后面操作this。
@@ -829,7 +874,7 @@ var layout = exports.layout = {
 };
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -920,6 +965,17 @@ var network = exports.network = {
             document.getElementsByTagName('head')[0].appendChild(domScript);
         }
     },
+    load_js_list: function load_js_list(js_list, success) {
+        var length = js_list.length;
+        ex.each(js_list, function (js) {
+            ex.load_js(js, function () {
+                length -= 1;
+                if (length == 0) {
+                    success();
+                }
+            });
+        });
+    },
     load_css: function load_css(src) {
         var name = btoa(src);
         if (window['__src_' + name]) {
@@ -956,7 +1012,7 @@ var network = exports.network = {
 };
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -977,7 +1033,7 @@ var obj_control = exports.obj_control = {
 };
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1246,7 +1302,7 @@ var old = exports.old = {
 };
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1292,7 +1348,7 @@ function sortOrder(array, key) {
 }
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1476,33 +1532,33 @@ if (!window.atob) {
 }
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _expand_menu = __webpack_require__(60);
+var _expand_menu = __webpack_require__(61);
 
 var f = _interopRequireWildcard(_expand_menu);
 
-var _page_tab = __webpack_require__(61);
+var _page_tab = __webpack_require__(62);
 
 var page = _interopRequireWildcard(_page_tab);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
-__webpack_require__(99);
+__webpack_require__(102);
 //import * as a from './modal.js'
 
-__webpack_require__(97);
-__webpack_require__(95);
-__webpack_require__(96);
-__webpack_require__(101);
 __webpack_require__(100);
+__webpack_require__(98);
+__webpack_require__(99);
+__webpack_require__(104);
+__webpack_require__(103);
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1605,7 +1661,7 @@ function para_encode(para_str) {
 }
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1648,6 +1704,28 @@ var vuetool = exports.vuetool = {
         return rt;
     },
     vueBroadcase: function vueBroadcase() {},
+    vuexParName: function vuexParName(self) {
+        var par = self.$parent;
+        while (par) {
+            if (par.store_name) {
+                return par.store_name;
+            } else {
+                par = par.$parent;
+            }
+        }
+    },
+    vuexEmit: function vuexEmit(self, event_name, event) {
+        var parName = ex.vuexParName(self);
+        if (parName) {
+            self.$store.state[parName].childbus.$emit(event_name, event);
+        }
+    },
+    vuexOn: function vuexOn(self, event_name, func) {
+        var parName = ex.vuexParName(self);
+        if (parName) {
+            self.$store.state[parName].childbus.$on(event_name, func);
+        }
+    },
     vueDispatch: function vueDispatch(self, event, kws) {
         var kws = kws || {};
         kws.source = self;
@@ -1727,7 +1805,6 @@ function cusParCall(self, fun, kws, rt) {
 }
 
 /***/ }),
-/* 20 */,
 /* 21 */,
 /* 22 */,
 /* 23 */,
@@ -1767,13 +1844,14 @@ function cusParCall(self, fun, kws, rt) {
 /* 57 */,
 /* 58 */,
 /* 59 */,
-/* 60 */
+/* 60 */,
+/* 61 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-__webpack_require__(98);
+__webpack_require__(101);
 var template_str = '\n<div class=\'_expand_menu\'>\n\t<ul>\n\t\t<li v-for=\'act in normed_menu\'>\n\t\t\t<a :class=\'["menu_item",{"selected":act.selected,"opened_submenu":opened_submenu==act.submenu}]\'\n\t\t\t\t:href=\'act.submenu?"javascript:void(0)":act.url\'\n\t\t\t\t@click=\'main_act_click(act)\'>\n\t\t\t\t<span v-html=\'act.icon\' class=\'_icon\'></span><span v-text=\'act.label\'></span>\n\t\t\t\t<span v-show="act.submenu">\n\t\t\t\t\t<span v-if="opened_submenu==act.submenu ||act.selected" style="float: right;margin-right: 1em;">\n\t\t\t\t\t\t<i class="fa fa-chevron-down"></i>\n\t\t\t\t\t</span>\n\t\t\t\t\t<span v-else style="float: right;margin-right: 1em;"><i class="fa fa-chevron-left"></i></span>\n\t\t\t\t</span>\n\t\t\t\t<!--<span class=\'left-arrow\' v-if=\'act.selected\'></span>-->\n\t\t\t</a>\n\n\t\t\t<ul class=\'submenu\' v-show=\'opened_submenu==act.submenu ||act.selected\' transition="expand">\n\t\t\t\t<li v-for=\'sub_act in act.submenu\' :class=\'{"active":sub_act.active}\'>\n\t\t\t\t\t<a :href=\'sub_act.url\' class=\'sub_item\'>\n\t\t\t\t\t\t<span v-text=\'sub_act.label\'></span>\n\t\t\t\t\t</a>\n\n\t\t\t\t</li>\n\t\t\t</ul>\n\t\t</li>\n\t</ul>\n</div>\n';
 
 Vue.component('expand_menu', {
@@ -1871,7 +1949,7 @@ Vue.component('expand_menu', {
 //})
 
 /***/ }),
-/* 61 */
+/* 62 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1885,7 +1963,6 @@ Vue.component('page-tab', {
 document.write('\n <style type="text/css" media="screen" id="test">\n.inst-menu{\n\t\tmargin: 30px auto;\n\t\tborder-bottom: 1px solid #DADCDE;\n\t}\n.inst-menu li{\n\tdisplay: inline-block;\n\tpadding: 10px 20px;\n\tfont-size: 16px;\n}\n.inst-menu li:hover{\n\tcursor: pointer;\n}\n.inst-menu .active{\n\tborder-bottom: 5px solid #0092F2;\n\tcolor: #0092F2;\n}\n</style>\n');
 
 /***/ }),
-/* 62 */,
 /* 63 */,
 /* 64 */,
 /* 65 */,
@@ -1900,7 +1977,9 @@ document.write('\n <style type="text/css" media="screen" id="test">\n.inst-menu{
 /* 74 */,
 /* 75 */,
 /* 76 */,
-/* 77 */
+/* 77 */,
+/* 78 */,
+/* 79 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(0)();
@@ -1914,7 +1993,7 @@ exports.push([module.i, "template {\n  display: none; }\n\nhtml, body {\n  heigh
 
 
 /***/ }),
-/* 78 */
+/* 80 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(0)();
@@ -1928,7 +2007,7 @@ exports.push([module.i, "@charset \"UTF-8\";\n.center-vh {\n  position: absolute
 
 
 /***/ }),
-/* 79 */
+/* 81 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(0)();
@@ -1942,7 +2021,7 @@ exports.push([module.i, ".checkbox {\n  padding-left: 20px; }\n\n.checkbox label
 
 
 /***/ }),
-/* 80 */
+/* 82 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(0)();
@@ -1956,7 +2035,7 @@ exports.push([module.i, "._expand_menu {\n  background-color: #364150; }\n  ._ex
 
 
 /***/ }),
-/* 81 */
+/* 83 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(0)();
@@ -1970,7 +2049,7 @@ exports.push([module.i, ".flex {\n  display: flex; }\n\n.flex-v {\n  display: fl
 
 
 /***/ }),
-/* 82 */
+/* 84 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(0)();
@@ -1984,7 +2063,7 @@ exports.push([module.i, ".clickable {\n  cursor: pointer;\n  color: #4da8cd; }\n
 
 
 /***/ }),
-/* 83 */
+/* 85 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(0)();
@@ -1998,8 +2077,6 @@ exports.push([module.i, ".ellipsis {\n  white-space: nowrap;\n  text-overflow: e
 
 
 /***/ }),
-/* 84 */,
-/* 85 */,
 /* 86 */,
 /* 87 */,
 /* 88 */,
@@ -2009,13 +2086,16 @@ exports.push([module.i, ".ellipsis {\n  white-space: nowrap;\n  text-overflow: e
 /* 92 */,
 /* 93 */,
 /* 94 */,
-/* 95 */
+/* 95 */,
+/* 96 */,
+/* 97 */,
+/* 98 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(77);
+var content = __webpack_require__(79);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // add the styles to the DOM
 var update = __webpack_require__(1)(content, {});
@@ -2035,13 +2115,13 @@ if(false) {
 }
 
 /***/ }),
-/* 96 */
+/* 99 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(78);
+var content = __webpack_require__(80);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // add the styles to the DOM
 var update = __webpack_require__(1)(content, {});
@@ -2061,13 +2141,13 @@ if(false) {
 }
 
 /***/ }),
-/* 97 */
+/* 100 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(79);
+var content = __webpack_require__(81);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // add the styles to the DOM
 var update = __webpack_require__(1)(content, {});
@@ -2087,13 +2167,13 @@ if(false) {
 }
 
 /***/ }),
-/* 98 */
+/* 101 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(80);
+var content = __webpack_require__(82);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // add the styles to the DOM
 var update = __webpack_require__(1)(content, {});
@@ -2113,13 +2193,13 @@ if(false) {
 }
 
 /***/ }),
-/* 99 */
+/* 102 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(81);
+var content = __webpack_require__(83);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // add the styles to the DOM
 var update = __webpack_require__(1)(content, {});
@@ -2139,13 +2219,13 @@ if(false) {
 }
 
 /***/ }),
-/* 100 */
+/* 103 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(82);
+var content = __webpack_require__(84);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // add the styles to the DOM
 var update = __webpack_require__(1)(content, {});
@@ -2165,13 +2245,13 @@ if(false) {
 }
 
 /***/ }),
-/* 101 */
+/* 104 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(83);
+var content = __webpack_require__(85);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // add the styles to the DOM
 var update = __webpack_require__(1)(content, {});
@@ -2191,42 +2271,44 @@ if(false) {
 }
 
 /***/ }),
-/* 102 */,
-/* 103 */
+/* 105 */,
+/* 106 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _old = __webpack_require__(14);
+var _old = __webpack_require__(15);
 
-var _network = __webpack_require__(12);
+var _network = __webpack_require__(13);
 
-var _urlparse = __webpack_require__(18);
+var _urlparse = __webpack_require__(19);
 
 var _collection = __webpack_require__(9);
 
-var _patch = __webpack_require__(16);
+var _patch = __webpack_require__(17);
 
 var path = _interopRequireWildcard(_patch);
 
 var _cookie = __webpack_require__(10);
 
-var _obj = __webpack_require__(13);
+var _obj = __webpack_require__(14);
 
-var _vuetools = __webpack_require__(19);
+var _vuetools = __webpack_require__(20);
 
 var _code = __webpack_require__(8);
 
-var _order = __webpack_require__(15);
+var _order = __webpack_require__(16);
 
-var _layout = __webpack_require__(11);
+var _layout = __webpack_require__(12);
+
+var _file_proc = __webpack_require__(11);
 
 var _cfg = __webpack_require__(7);
 
 var cfg = _interopRequireWildcard(_cfg);
 
-var _main = __webpack_require__(17);
+var _main = __webpack_require__(18);
 
 var uis = _interopRequireWildcard(_main);
 
@@ -2237,6 +2319,7 @@ var ex = {
         for (var key in src) {
             dst[key] = src[key];
         }
+        return dst;
     }
 
     //import {md5} from  './md5.min'
@@ -2250,6 +2333,8 @@ ex.assign(ex, _obj.obj_control);
 ex.assign(ex, _vuetools.vuetool);
 ex.assign(ex, _code.code);
 ex.assign(ex, _layout.layout);
+ex.assign(ex, _file_proc.file_proc);
+
 ex.sortOrder = _order.sortOrder;
 
 //ex.md5=md5
