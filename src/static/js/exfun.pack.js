@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 106);
+/******/ 	return __webpack_require__(__webpack_require__.s = 126);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -380,13 +380,18 @@ function updateLink(linkElement, obj) {
 /* 4 */,
 /* 5 */,
 /* 6 */,
-/* 7 */
+/* 7 */,
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 window.cfg = {
+    env: {
+        width: $(window).width(),
+        height: $(window).height()
+    },
     showMsg: function showMsg(msg) {
         layer.alert(msg);
     },
@@ -408,11 +413,95 @@ window.cfg = {
             var realMsg = msg || '操作成功';
             layer.msg(realMsg, { time: delay });
         }
+    },
+    pop_edit: function pop_edit(fields_ctx) {},
+    pop_edit_local: function (_pop_edit_local) {
+        function pop_edit_local(_x, _x2) {
+            return _pop_edit_local.apply(this, arguments);
+        }
+
+        pop_edit_local.toString = function () {
+            return _pop_edit_local.toString();
+        };
+
+        return pop_edit_local;
+    }(function (fields_ctx, callback) {
+        var winindex = pop_edit_local(fields_ctx.row, fields_ctx, callback);
+        return function () {
+            layer.close(winindex);
+        };
+    }),
+
+    pop_big: function pop_big(editor, ctx, callback) {
+        var width = Math.min(cfg.env.width * 0.9, 950);
+        var heigth = Math.min(cfg.env.height * 0.9, 700);
+        var winindex = pop_layer(ctx, editor, callback, {
+            area: [width + 'px', heigth + 'px']
+        });
+        return function () {
+            layer.close(winindex);
+        };
+    },
+    pop_middle: function pop_middle(editor, ctx, callback) {
+        var width = Math.min(800, cfg.env.width);
+        var layercfg = {
+            area: [width + 'px', '500px']
+        };
+        if (ctx.layer) {
+            ex.assign(layercfg, ctx.layer);
+        }
+
+        var winindex = pop_layer(ctx, editor, callback, layercfg);
+        return function () {
+            layer.close(winindex);
+        };
+        //store.commit('left_in_page',{editor:editor,ctx:ctx,callback:callback})
+        //return function (){
+        //    history.back()
+        //}
+    },
+    pop_small: function pop_small(editor, ctx, callback) {
+        //return pop_mobile_win(editor,ctx,callback)
+        var layer_cfg = {
+            title: ctx.title || '详细',
+            area: ctx.area || ['42rem', '32rem']
+        };
+        if (ctx.layer) {
+            ex.assign(layer_cfg, ctx.layer);
+        }
+        var winindex = pop_layer(ctx, editor, callback, layer_cfg);
+        return function () {
+            layer.close(winindex);
+        };
+    },
+    close_win: function close_win(index) {
+        if (index == 'full_win') {
+            history.back();
+        }
+    },
+    pop_close: function pop_close(close_func) {
+        // 关闭窗口，窗口创建函数返回的，全部是一个关闭函数
+        close_func();
+    },
+    pop_iframe: function pop_iframe(url, option) {
+        var dc = {
+            type: 2,
+            title: '',
+            area: ['80%', '80%'],
+            content: url //这里content是一个URL，如果你不想让iframe出现滚动条，你还可以content: ['http://sentsin.com', 'no']
+        };
+        ex.assign(dc, option);
+        layer.open(dc);
     }
 };
 
+$(window).resize(function () {
+    cfg.env.width = $(window).width();
+    cfg.env.height = $(window).height();
+});
+
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -475,6 +564,7 @@ var code = exports.code = {
         }
     },
     eval: function _eval(js, scope) {
+        var rt = '';
         return eval(js);
     },
     _count: 0,
@@ -509,7 +599,7 @@ var code = exports.code = {
 };
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -726,7 +816,7 @@ var collection = exports.collection = {
 };
 
 /***/ }),
-/* 10 */
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -784,7 +874,7 @@ var cookie = exports.cookie = {
 };
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -824,7 +914,7 @@ var file_proc = exports.file_proc = {
 };
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -833,9 +923,33 @@ var file_proc = exports.file_proc = {
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
+var ua = navigator.userAgent.toLocaleLowerCase();
+var pf = navigator.platform.toLocaleLowerCase();
+var isAndroid = /android/i.test(ua) || /iPhone|iPod|iPad/i.test(ua) && /linux/i.test(pf) || /ucweb.*linux/i.test(ua);
+var isIOS = /iPhone|iPod|iPad/i.test(ua) && !isAndroid;
+var isWinPhone = /Windows Phone|ZuneWP7/i.test(ua);
+
 var layout = exports.layout = {
-    stickup: function stickup(node) {
+    device: {
+        pc: !isAndroid && !isIOS && !isWinPhone,
+        ios: isIOS,
+        android: isAndroid,
+        winPhone: isWinPhone
+    },
+    is_small_screen: function is_small_screen() {
+        return $(window).width() < 760;
+    },
+    stickup: function stickup(node, options) {
+        /*
+        node: stickup 的元素
+        options:
+            dom: 滚动的容器，dom外层不能滚动，否则不能定位
+            top: stick时，距离窗口上边的距离
+        * */
+        var dom = options.dom || window;
+        var fixed_top = options.top || 0;
         var $cur = $(node); //方便后面操作this。
+        var dom_top = $(dom).offset().top;
         var top = $cur.offset().top; //获取元素距离顶部的距离
         var left = $cur.offset().left; //获取元素的水平位置
         var width = $cur.width(); //获取元素的宽度
@@ -844,10 +958,10 @@ var layout = exports.layout = {
         //克隆这个元素，这里opactiy和display:none 是双重保险.
         var now = $cur.clone().css("opacity", 0).insertBefore($cur).hide();
 
-        $(window).on("scroll", function () {
+        $(dom).on("scroll", function () {
 
-            var socrllTop = $(window).scrollTop();
-            if (socrllTop >= top) {
+            var socrllTop = $(dom).scrollTop();
+            if (socrllTop >= top - dom_top) {
                 setStick();
             } else {
                 unsetStick();
@@ -855,11 +969,11 @@ var layout = exports.layout = {
         });
 
         function setStick() {
-            console.log($(window).scrollLeft());
+            console.log($(dom).scrollLeft());
             $cur.css({
                 "position": "fixed",
-                "left": left - $(window).scrollLeft(),
-                "top": 0,
+                "left": left - $(dom).scrollLeft(),
+                "top": fixed_top,
                 "width": width,
                 "height": height,
                 "z-index": 10
@@ -874,7 +988,7 @@ var layout = exports.layout = {
 };
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -920,20 +1034,39 @@ var network = exports.network = {
                     }
                 }
             }
-            if (msg.length != 0) {
-                cfg.warning(msg.join('\n'));
-            }
             //if (resp.status && typeof resp.status == 'string' && resp.status != 'success') {
             if (resp.success === false) {
                 cfg.hide_load(); // sometime
-                return;
             } else {
-                callback(resp);
+                var rt = callback(resp);
+                if (rt == false) {
+                    return; // 模拟事件冒泡，返回false，就不继续执行下面的语句了。
+                }
+            }
+
+            if (msg.length != 0) {
+                if (resp.success === false) {
+                    cfg.showError(msg.join('\n'));
+                } else {
+                    cfg.showMsg(msg.join('\n'));
+                }
             }
         };
         return $.post(url, data, wrap_callback);
     },
     load_js: function load_js(src, success) {
+        if (success) {
+            return ex._load_js(src, success);
+        } else {
+            var p = new Promise(function (resolve, reject) {
+                ex._load_js(src, function () {
+                    resolve();
+                });
+            });
+            return p;
+        }
+    },
+    _load_js: function _load_js(src, success) {
         success = success || function () {};
         var name = src; //btoa(src)
         if (!window['__js_hook_' + name]) {
@@ -1012,7 +1145,7 @@ var network = exports.network = {
 };
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1033,7 +1166,7 @@ var obj_control = exports.obj_control = {
 };
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1302,7 +1435,7 @@ var old = exports.old = {
 };
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1348,7 +1481,7 @@ function sortOrder(array, key) {
 }
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1532,33 +1665,33 @@ if (!window.atob) {
 }
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _expand_menu = __webpack_require__(61);
+var _expand_menu = __webpack_require__(67);
 
 var f = _interopRequireWildcard(_expand_menu);
 
-var _page_tab = __webpack_require__(62);
+var _page_tab = __webpack_require__(68);
 
 var page = _interopRequireWildcard(_page_tab);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
-__webpack_require__(102);
+__webpack_require__(122);
 //import * as a from './modal.js'
 
-__webpack_require__(100);
-__webpack_require__(98);
-__webpack_require__(99);
-__webpack_require__(104);
-__webpack_require__(103);
+__webpack_require__(120);
+__webpack_require__(118);
+__webpack_require__(119);
+__webpack_require__(124);
+__webpack_require__(123);
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1661,7 +1794,7 @@ function para_encode(para_str) {
 }
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1704,6 +1837,30 @@ var vuetool = exports.vuetool = {
         return rt;
     },
     vueBroadcase: function vueBroadcase() {},
+    vueParStore: function vueParStore(self) {
+        var parent = self.$parent;
+        while (parent) {
+            if (parent.childStore) {
+                return parent.childStore;
+            } else {
+                parent = parent.$parent;
+            }
+        }
+    },
+
+    vueChildBusOn: function vueChildBusOn(self, event_name, func) {
+        var parent = self.$parent;
+        while (parent) {
+            if (parent.childBus) {
+                break;
+            } else {
+                parent = parent.$parent;
+            }
+        }
+        if (parent) {
+            parent.childbus.$on(event_name, func);
+        }
+    },
     vuexParName: function vuexParName(self) {
         var par = self.$parent;
         while (par) {
@@ -1805,7 +1962,6 @@ function cusParCall(self, fun, kws, rt) {
 }
 
 /***/ }),
-/* 21 */,
 /* 22 */,
 /* 23 */,
 /* 24 */,
@@ -1845,13 +2001,19 @@ function cusParCall(self, fun, kws, rt) {
 /* 58 */,
 /* 59 */,
 /* 60 */,
-/* 61 */
+/* 61 */,
+/* 62 */,
+/* 63 */,
+/* 64 */,
+/* 65 */,
+/* 66 */,
+/* 67 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-__webpack_require__(101);
+__webpack_require__(121);
 var template_str = '\n<div class=\'_expand_menu\'>\n\t<ul>\n\t\t<li v-for=\'act in normed_menu\'>\n\t\t\t<a :class=\'["menu_item",{"selected":act.selected,"opened_submenu":opened_submenu==act.submenu}]\'\n\t\t\t\t:href=\'act.submenu?"javascript:void(0)":act.url\'\n\t\t\t\t@click=\'main_act_click(act)\'>\n\t\t\t\t<span v-html=\'act.icon\' class=\'_icon\'></span><span v-text=\'act.label\'></span>\n\t\t\t\t<span v-show="act.submenu">\n\t\t\t\t\t<span v-if="opened_submenu==act.submenu ||act.selected" style="float: right;margin-right: 1em;">\n\t\t\t\t\t\t<i class="fa fa-chevron-down"></i>\n\t\t\t\t\t</span>\n\t\t\t\t\t<span v-else style="float: right;margin-right: 1em;"><i class="fa fa-chevron-left"></i></span>\n\t\t\t\t</span>\n\t\t\t\t<!--<span class=\'left-arrow\' v-if=\'act.selected\'></span>-->\n\t\t\t</a>\n\n\t\t\t<ul class=\'submenu\' v-show=\'opened_submenu==act.submenu ||act.selected\' transition="expand">\n\t\t\t\t<li v-for=\'sub_act in act.submenu\' :class=\'{"active":sub_act.active}\'>\n\t\t\t\t\t<a :href=\'sub_act.url\' class=\'sub_item\'>\n\t\t\t\t\t\t<span v-text=\'sub_act.label\'></span>\n\t\t\t\t\t</a>\n\n\t\t\t\t</li>\n\t\t\t</ul>\n\t\t</li>\n\t</ul>\n</div>\n';
 
 Vue.component('expand_menu', {
@@ -1949,7 +2111,7 @@ Vue.component('expand_menu', {
 //})
 
 /***/ }),
-/* 62 */
+/* 68 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1963,12 +2125,6 @@ Vue.component('page-tab', {
 document.write('\n <style type="text/css" media="screen" id="test">\n.inst-menu{\n\t\tmargin: 30px auto;\n\t\tborder-bottom: 1px solid #DADCDE;\n\t}\n.inst-menu li{\n\tdisplay: inline-block;\n\tpadding: 10px 20px;\n\tfont-size: 16px;\n}\n.inst-menu li:hover{\n\tcursor: pointer;\n}\n.inst-menu .active{\n\tborder-bottom: 5px solid #0092F2;\n\tcolor: #0092F2;\n}\n</style>\n');
 
 /***/ }),
-/* 63 */,
-/* 64 */,
-/* 65 */,
-/* 66 */,
-/* 67 */,
-/* 68 */,
 /* 69 */,
 /* 70 */,
 /* 71 */,
@@ -1979,7 +2135,20 @@ document.write('\n <style type="text/css" media="screen" id="test">\n.inst-menu{
 /* 76 */,
 /* 77 */,
 /* 78 */,
-/* 79 */
+/* 79 */,
+/* 80 */,
+/* 81 */,
+/* 82 */,
+/* 83 */,
+/* 84 */,
+/* 85 */,
+/* 86 */,
+/* 87 */,
+/* 88 */,
+/* 89 */,
+/* 90 */,
+/* 91 */,
+/* 92 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(0)();
@@ -1993,7 +2162,7 @@ exports.push([module.i, "template {\n  display: none; }\n\nhtml, body {\n  heigh
 
 
 /***/ }),
-/* 80 */
+/* 93 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(0)();
@@ -2007,7 +2176,7 @@ exports.push([module.i, "@charset \"UTF-8\";\n.center-vh {\n  position: absolute
 
 
 /***/ }),
-/* 81 */
+/* 94 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(0)();
@@ -2021,7 +2190,7 @@ exports.push([module.i, ".checkbox {\n  padding-left: 20px; }\n\n.checkbox label
 
 
 /***/ }),
-/* 82 */
+/* 95 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(0)();
@@ -2035,7 +2204,7 @@ exports.push([module.i, "._expand_menu {\n  background-color: #364150; }\n  ._ex
 
 
 /***/ }),
-/* 83 */
+/* 96 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(0)();
@@ -2049,7 +2218,7 @@ exports.push([module.i, ".flex {\n  display: flex; }\n\n.flex-v {\n  display: fl
 
 
 /***/ }),
-/* 84 */
+/* 97 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(0)();
@@ -2063,7 +2232,7 @@ exports.push([module.i, ".clickable {\n  cursor: pointer;\n  color: #4da8cd; }\n
 
 
 /***/ }),
-/* 85 */
+/* 98 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(0)();
@@ -2077,25 +2246,32 @@ exports.push([module.i, ".ellipsis {\n  white-space: nowrap;\n  text-overflow: e
 
 
 /***/ }),
-/* 86 */,
-/* 87 */,
-/* 88 */,
-/* 89 */,
-/* 90 */,
-/* 91 */,
-/* 92 */,
-/* 93 */,
-/* 94 */,
-/* 95 */,
-/* 96 */,
-/* 97 */,
-/* 98 */
+/* 99 */,
+/* 100 */,
+/* 101 */,
+/* 102 */,
+/* 103 */,
+/* 104 */,
+/* 105 */,
+/* 106 */,
+/* 107 */,
+/* 108 */,
+/* 109 */,
+/* 110 */,
+/* 111 */,
+/* 112 */,
+/* 113 */,
+/* 114 */,
+/* 115 */,
+/* 116 */,
+/* 117 */,
+/* 118 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(79);
+var content = __webpack_require__(92);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // add the styles to the DOM
 var update = __webpack_require__(1)(content, {});
@@ -2115,13 +2291,13 @@ if(false) {
 }
 
 /***/ }),
-/* 99 */
+/* 119 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(80);
+var content = __webpack_require__(93);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // add the styles to the DOM
 var update = __webpack_require__(1)(content, {});
@@ -2141,13 +2317,13 @@ if(false) {
 }
 
 /***/ }),
-/* 100 */
+/* 120 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(81);
+var content = __webpack_require__(94);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // add the styles to the DOM
 var update = __webpack_require__(1)(content, {});
@@ -2167,13 +2343,13 @@ if(false) {
 }
 
 /***/ }),
-/* 101 */
+/* 121 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(82);
+var content = __webpack_require__(95);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // add the styles to the DOM
 var update = __webpack_require__(1)(content, {});
@@ -2193,13 +2369,13 @@ if(false) {
 }
 
 /***/ }),
-/* 102 */
+/* 122 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(83);
+var content = __webpack_require__(96);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // add the styles to the DOM
 var update = __webpack_require__(1)(content, {});
@@ -2219,13 +2395,13 @@ if(false) {
 }
 
 /***/ }),
-/* 103 */
+/* 123 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(84);
+var content = __webpack_require__(97);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // add the styles to the DOM
 var update = __webpack_require__(1)(content, {});
@@ -2245,13 +2421,13 @@ if(false) {
 }
 
 /***/ }),
-/* 104 */
+/* 124 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(85);
+var content = __webpack_require__(98);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // add the styles to the DOM
 var update = __webpack_require__(1)(content, {});
@@ -2271,44 +2447,44 @@ if(false) {
 }
 
 /***/ }),
-/* 105 */,
-/* 106 */
+/* 125 */,
+/* 126 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _old = __webpack_require__(15);
+var _old = __webpack_require__(16);
 
-var _network = __webpack_require__(13);
+var _network = __webpack_require__(14);
 
-var _urlparse = __webpack_require__(19);
+var _urlparse = __webpack_require__(20);
 
-var _collection = __webpack_require__(9);
+var _collection = __webpack_require__(10);
 
-var _patch = __webpack_require__(17);
+var _patch = __webpack_require__(18);
 
 var path = _interopRequireWildcard(_patch);
 
-var _cookie = __webpack_require__(10);
+var _cookie = __webpack_require__(11);
 
-var _obj = __webpack_require__(14);
+var _obj = __webpack_require__(15);
 
-var _vuetools = __webpack_require__(20);
+var _vuetools = __webpack_require__(21);
 
-var _code = __webpack_require__(8);
+var _code = __webpack_require__(9);
 
-var _order = __webpack_require__(16);
+var _order = __webpack_require__(17);
 
-var _layout = __webpack_require__(12);
+var _layout = __webpack_require__(13);
 
-var _file_proc = __webpack_require__(11);
+var _file_proc = __webpack_require__(12);
 
-var _cfg = __webpack_require__(7);
+var _cfg = __webpack_require__(8);
 
 var cfg = _interopRequireWildcard(_cfg);
 
-var _main = __webpack_require__(18);
+var _main = __webpack_require__(19);
 
 var uis = _interopRequireWildcard(_main);
 
